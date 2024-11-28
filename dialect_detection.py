@@ -3,21 +3,25 @@ from collections import Counter
 import pandas as pd
 import nltk
 
-# put every document into a dictionary by id
 doc_dict = {}
 id_dict = {}
-
 country_set = set()
+
+# pulls text IDs, country codes, and document types from the excel sheet,
+# using it to divide the documents into a dictionary by ID
 sources_df = pd.read_excel("./text/sampleSources.xlsx", sheet_name="texts")
 for text_id, (country_code, doc_type) in [(l[0], tuple(l[1].split())) for l in sources_df[["textID", "country|genre"]].values.tolist()]:
     with open(f"./text/w_{country_code.lower()}_{doc_type.lower()}.txt", 'r',
               encoding="utf-8") as file:
-        # add each text id to id_dict
+        # add each text_id to id_dict
         if f"{country_code}_{doc_type}" not in id_dict:
             id_dict[f"{country_code}_{doc_type}"] = [text_id]
         else:
             id_dict[f"{country_code}_{doc_type}"].append(text_id)
+        # makes country code set
         country_set.add(country_code)
+        # finds correct text_id
+        # then tokenizes and adds every line in the document to the dictionary
         IS_DOC = False
         lines = file.readlines()
         for i, line in enumerate(lines):
@@ -72,7 +76,6 @@ doc_dict_25 = copy.deepcopy(doc_dict)
 for text_id, doc in doc_dict_25.items():
     for i, word in enumerate(doc):
         if word not in vocab_25:
-            print(text_id, word)
             doc_dict_25[text_id][i] = '<UNK>'
             vocab_25['<UNK>'] += 1
 
@@ -81,6 +84,5 @@ doc_dict_50 = copy.deepcopy(doc_dict)
 for text_id, doc in doc_dict_50.items():
     for i, word in enumerate(doc):
         if word not in vocab_50:
-            print(text_id, word)
             doc_dict_50[text_id][i] = '<UNK>'
             vocab_50['<UNK>'] += 1
